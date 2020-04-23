@@ -1,6 +1,7 @@
 package com.couchbase.javaclient.doc;
 
 import java.util.ArrayList;
+import com.github.javafaker.Faker;
 
 public class DocSpec {
 	int _num_ops;
@@ -12,9 +13,12 @@ public class DocSpec {
 	String _prefix;
 	String _suffix;
 	String _template;
+	int _expiry;
+	int _size;
+	public static Faker faker = new Faker();
 
 	public DocSpec(int _num_ops, int _percent_create, int _percent_update, int _percent_delete, String _load_pattern,
-			int _startSeqNum, String _prefix, String _suffix, String _template) {
+			int _startSeqNum, String _prefix, String _suffix, String _template, int _expiry, int _size) {
 
 		this._num_ops = _num_ops;
 		this._percent_create = _percent_create;
@@ -25,6 +29,8 @@ public class DocSpec {
 		this._prefix = _prefix;
 		this._suffix = _suffix;
 		this._template = _template;
+		this._expiry = _expiry;
+		this._size = _size;
 	}
 
 	public int get_num_ops() {
@@ -63,6 +69,14 @@ public class DocSpec {
 		return _template;
 	}
 
+	public long get_expiry() {
+		return _expiry;
+	}
+
+	public int get_size() {
+		return _size;
+	}
+
 	public void set_num_ops(int _num_ops) {
 		this._num_ops = _num_ops;
 	}
@@ -99,4 +113,11 @@ public class DocSpec {
 		this._template = _template;
 	}
 
+	public void set_expiry(int _expiry) {
+		this._expiry = _expiry;
+	}
+
+	public void set_size(int _size) {
+		this._size = _size;
+	}
 }

@@ -62,40 +62,34 @@ public class DocRetrieve implements Callable<String> {
 
 	public static void printCollection(DocSpec ds, Collection collection) {
 		ReactiveCollection rcollection = collection.reactive();
-		int created_docs = (int) (ds.get_num_ops()*((float) ds.get_percent_create()/100));
-		int deleted_docs = (int) (ds.get_num_ops()*((float) ds.get_percent_delete()/100));
+		int created_docs = (int) (ds.get_num_ops() * ((float) ds.get_percent_create() / 100));
+		int deleted_docs = (int) (ds.get_num_ops() * ((float) ds.get_percent_delete() / 100));
 		int expected_docs = created_docs - deleted_docs;
-	
+
 		System.out.println("deleted docs " + deleted_docs);
 		System.out.println("expected docs " + expected_docs);
-		
+
 		List<String> docsToDeleteList = new ArrayList<>();
 		String key = null;
 		try {
-			for(int id=ds.get_startSeqNum(); id < ds.get_startSeqNum() + num_docs; id++) {
+			for (int id = ds.get_startSeqNum(); id < ds.get_startSeqNum() + num_docs; id++) {
 				key = ds.get_prefix() + id + ds.get_suffix();
 				GetResult found = collection.get(key);
 				docsToDeleteList.add(key);
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println(key + " not found. Skipping delete");
 		}
 		Flux<String> docsToDelete = Flux.fromIterable(docsToDeleteList);
-		
-		
-		
-		
-		
-		
+
 		List<String> docsToFetchList = new ArrayList<>();
-		
-		for(int id=ds.get_startSeqNum() + deleted_docs; id<=created_docs; id++) {
+
+		for (int id = ds.get_startSeqNum() + deleted_docs; id <= created_docs; id++) {
 			key = ds.get_prefix() + id + ds.get_suffix();
 			docsToFetchList.add(key);
 		}
-		List<GetResult> actual_docs = Flux.fromIterable(docsToFetchList)
-				.flatMap(id -> rcollection.get(id))
-				.log()
+		List<GetResult> actual_docs = Flux.fromIterable(docsToFetchList).flatMap(id -> rcollection.get(id))
+				// .log()
 				.collectList()
 				// Block until last value, complete or timeout expiry
 				.block(Duration.ofMinutes(10));

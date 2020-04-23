@@ -1,19 +1,20 @@
 package com.couchbase.javaclient.reactive;
 
+import static com.couchbase.client.java.kv.MutateInSpec.insert;
+
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.UUID;
 
-import com.couchbase.client.core.error.DocumentNotFoundException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.ReactiveCollection;
-import com.couchbase.client.java.kv.GetResult;
 import com.couchbase.client.java.manager.collection.CollectionSpec;
 import com.couchbase.client.java.manager.collection.ScopeSpec;
 import com.couchbase.javaclient.doc.DocSpec;
-import com.couchbase.javaclient.doc.Person;
 
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -22,8 +23,8 @@ public class DocDelete implements Callable<String> {
 	private DocSpec ds;
 	private Bucket bucket;
 	private Collection collection;
-	private static int num_docs=0;
-	private boolean done=false;
+	private static int num_docs = 0;
+	private boolean done = false;
 
 	public DocDelete(DocSpec _ds, Bucket _bucket) {
 		ds = _ds;
@@ -34,19 +35,19 @@ public class DocDelete implements Callable<String> {
 		ds = _ds;
 		collection = _collection;
 	}
-	
+
 	@Override
 	public String call() throws Exception {
-		if(collection != null) {
-			deleteCollection(ds,collection);
-		}else {
+		if (collection != null) {
+			deleteCollection(ds, collection);
+		} else {
 			deleteBucketCollections(ds, bucket);
 		}
 		done = true;
-		return num_docs + " DOCS DELETED!";
+		return num_docs + " DOCS UPDATED!";
 	}
 
-	public static void deleteBucketCollections(DocSpec ds, Bucket bucket) {
+	public void deleteBucketCollections(DocSpec ds, Bucket bucket) {
 		List<Collection> bucketCollections = new ArrayList<>();
 		List<ScopeSpec> bucketScopes = bucket.collections().getAllScopes();
 		for (ScopeSpec scope : bucketScopes) {
@@ -57,43 +58,30 @@ public class DocDelete implements Callable<String> {
 				}
 			}
 		}
-		bucketCollections.parallelStream().forEach(c -> deleteCollection(ds, c));
+		bucketCollections.parallelStream().forEach(c -> delete(ds, c));
 	}
 
-	public static void deleteCollection(DocSpec ds, Collection collection) {
+	public void deleteCollection(DocSpec ds, Collection collection) {
+		delete(ds, collection);
+	}
+
+	public void delete(DocSpec ds, Collection collection) {
 		ReactiveCollection rcollection = collection.reactive();
-		num_docs = (int) (ds.get_num_ops()*((float) ds.get_percent_delete()/100));
-		List<String> docsToDeleteList = new ArrayList<>();
-		String key = null;
+		num_docs = (int) (ds.get_num_ops() * ((float) ds.get_percent_delete() / 100));
+		Flux<String> docsToDelete = Flux.range(ds.get_startSeqNum(), num_docs)
+				.map(id -> ds.get_prefix() + id + ds.get_suffix());
+		System.out.println("Started delete..");
 		try {
-			for(int id=ds.get_startSeqNum(); id < ds.get_startSeqNum() + num_docs; id++) {
-				key = ds.get_prefix() + id + ds.get_suffix();
-				GetResult found = collection.get(key);
-				docsToDeleteList.add(key);
-			}
-		}catch(Exception e) {
-			System.out.println(key + " not found. Skipping delete");
+			docsToDelete.publishOn(Schedulers.elastic())
+					// .delayElements(Duration.ofMillis(5))
+					.flatMap(key -> rcollection.remove(key))
+					// Num retries, first backoff, max backoff
+					.retryBackoff(10, Duration.ofMillis(100), Duration.ofMillis(1000))
+					// Block until last value, complete or timeout expiry
+					.blockLast(Duration.ofMinutes(10));
+		} catch (Exception err) {
+			err.printStackTrace();
 		}
-		Flux<String> docsToDelete = Flux.fromIterable(docsToDeleteList);
-
-		docsToDelete.buffer(1000).subscribe(keys -> deleteBatch(rcollection, keys));
-
-	}
-
-	public static void deleteBatch(ReactiveCollection rcollection, List<String> keys) {
-		Flux<String> batchKeys = Flux.fromIterable(keys);
-		try {
-			batchKeys.publishOn(Schedulers.parallel()).flatMap(key -> rcollection.remove(key))
-			// Num retries, first backoff, max backoff
-			.retryBackoff(10, Duration.ofMillis(100), Duration.ofMillis(1000))
-			// Block until last value, complete or timeout expiry
-			.blockLast(Duration.ofMinutes(10));
-		}catch(DocumentNotFoundException ex) {
-			
-		}
-	}
-
-	public boolean isDone() {
-		return done;
+		System.out.println("Completed delete");
 	}
 }

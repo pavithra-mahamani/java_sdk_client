@@ -10,13 +10,15 @@ public class DocSpecBuilder {
 	String _prefix;
 	String _suffix;
 	String _template;
+	int _expiry;
+	int _size;
 
 	public DocSpecBuilder() {
 	}
 
 	public DocSpec buildDocSpec() {
 		return new DocSpec(_num_ops, _percent_create, _percent_update, _percent_delete, _load_pattern, _startSeqNum,
-				_prefix, _suffix, _template);
+				_prefix, _suffix, _template, _expiry, _size);
 	}
 
 	public DocSpecBuilder loadPattern(String _load_pattern) {
@@ -61,6 +63,16 @@ public class DocSpecBuilder {
 
 	public DocSpecBuilder template(String _template) {
 		this._template = _template;
+		return this;
+	}
+
+	public DocSpecBuilder expiry(int _expiry) {
+		this._expiry = _expiry;
+		return this;
+	}
+
+	public DocSpecBuilder size(int _size) {
+		this._size = _size;
 		return this;
 	}
 
