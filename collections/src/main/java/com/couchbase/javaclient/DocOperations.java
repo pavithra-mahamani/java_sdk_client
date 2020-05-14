@@ -67,8 +67,7 @@ public class DocOperations {
 		parser.addArgument("-ds", "--size").setDefault(500).help("Document size in bytes");
 
 		// Output params
-		parser.addArgument("-o", "--output").choices("info", "verbose").setDefault("info")
-				.help("Output detail level");
+		parser.addArgument("-o", "--output").setDefault("info").help("Output detail level");
 
 		try {
 			Namespace ns = parser.parseArgs(args);
