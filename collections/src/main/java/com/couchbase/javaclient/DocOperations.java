@@ -13,7 +13,6 @@ import com.couchbase.client.java.ReactiveCollection;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.javaclient.doc.DocSpec;
 import com.couchbase.javaclient.doc.DocSpecBuilder;
-//import com.couchbase.javaclient.doc.Faker;
 import com.couchbase.javaclient.doc.Person;
 import com.couchbase.javaclient.reactive.DocCreate;
 import com.couchbase.javaclient.reactive.DocDelete;
@@ -71,7 +70,7 @@ public class DocOperations {
 
 		try {
 			Namespace ns = parser.parseArgs(args);
-			System.out.println(parser.parseArgs(args));
+			//System.out.println(parser.parseArgs(args));
 			run(ns);
 		} catch (ArgumentParserException e) {
 			parser.handleError(e);
