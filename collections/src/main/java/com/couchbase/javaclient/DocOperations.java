@@ -33,10 +33,8 @@ public class DocOperations {
 				.defaultHelp(true).description("Standalone SDK Client");
 		// Connection params
 		parser.addArgument("-i", "--cluster").required(true).help("Couchbase cluster address");
-		parser.addArgument("-u", "--username").required(false).setDefault("Administrator")
-				.help("Username of Couchbase user");
-		parser.addArgument("-p", "--password").required(false).setDefault("password")
-				.help("Password of Couchbase user");
+		parser.addArgument("-u", "--username").setDefault("Administrator").help("Username of Couchbase user");
+		parser.addArgument("-p", "--password").setDefault("password").help("Password of Couchbase user");
 		parser.addArgument("-b", "--bucket").setDefault("default").help("Name of existing Couchbase bucket");
 		parser.addArgument("-s", "--scope").setDefault("_default").help("Name of existing scope");
 		parser.addArgument("-c", "--collection").setDefault("default").help("Name of existing collection");
