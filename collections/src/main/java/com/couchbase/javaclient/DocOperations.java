@@ -29,10 +29,10 @@ import com.github.javafaker.Faker;
 
 public class DocOperations {
 	public static void main(String[] args) {
-		 ArgumentParser parser = ArgumentParsers.newFor("Couchbase Java SDK Client For
-		 Collections").build()
-		 .defaultHelp(true).description("Standalone SDK Client");
-		//final ArgumentParser parser = ArgumentParsers.newArgumentParser("Main", true);
+		ArgumentParser parser = ArgumentParsers.newFor("Couchbase Java SDK Client For Collections").build()
+				.defaultHelp(true).description("Standalone SDK Client");
+		// final ArgumentParser parser = ArgumentParsers.newArgumentParser("Main",
+		// true);
 		// Connection params
 		parser.addArgument("-i", "--cluster").required(true).help("Couchbase cluster address");
 		parser.addArgument("-u", "--username").setDefault("Administrator").help("Username of Couchbase user");
@@ -43,24 +43,23 @@ public class DocOperations {
 
 		// Operation params
 		parser.addArgument("-n", "--num_ops").type(Integer.class).setDefault(1000)
-		.help("Number of operations");
+				.help("Number of operations");
 		parser.addArgument("-pc", "--percent_create").type(Integer.class).setDefault(100)
-		.help("Percentage of creates out of num_ops");
+				.help("Percentage of creates out of num_ops");
 		parser.addArgument("-pu", "--percent_update").type(Integer.class).setDefault(0)
-		.help("Percentage of updates out of num_ops");
+				.help("Percentage of updates out of num_ops");
 		parser.addArgument("-pd", "--percent_delete").type(Integer.class).setDefault(0)
-		.help("Percentage of deletes out of num_ops");
+				.help("Percentage of deletes out of num_ops");
 		parser.addArgument("-pr", "--percent_read").type(Integer.class).setDefault(0)
-		.help("Percentage of reads out of num_ops");
-		parser.addArgument("-l", "--load_pattern").choices("uniform", "sparse", "dense")
-		.setDefault("uniform")
-		.help("uniform: load all collections with percent_create docs, "
-				+ "sparse: load all collections with maximum of percent_create docs"
-				+ "dense: load all collections with minimum of percent_create docs");
+				.help("Percentage of reads out of num_ops");
+		parser.addArgument("-l", "--load_pattern").choices("uniform", "sparse", "dense").setDefault("uniform")
+				.help("uniform: load all collections with percent_create docs, "
+						+ "sparse: load all collections with maximum of percent_create docs"
+						+ "dense: load all collections with minimum of percent_create docs");
 
 		// Doc params
 		parser.addArgument("-dsn", "--start_seq_num").type(Integer.class).setDefault(1)
-		.help("Doc id start sequence number");
+				.help("Doc id start sequence number");
 		parser.addArgument("-dpx", "--prefix").setDefault("doc_").help("Doc id prefix");
 		parser.addArgument("-dsx", "--suffix").setDefault("").help("Doc id suffix");
 		parser.addArgument("-dt", "--template").setDefault("Person").help("JSON document template");
