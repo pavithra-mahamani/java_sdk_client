@@ -76,6 +76,7 @@ public class DocOperations {
 	}
 
 	private static void run(Namespace ns) {
+		String port = ns.getString("port")
 		String clusterName = ns.getString("cluster");
 		String username = ns.getString("username");
 		String password = ns.getString("password");
