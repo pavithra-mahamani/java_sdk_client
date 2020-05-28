@@ -40,8 +40,7 @@ public class DocOperations {
 		parser.addArgument("-c", "--collection").setDefault("default").help("Name of existing collection");
 
 		// Operation params
-		parser.addArgument("-n", "--num_ops").type(Integer.class).setDefault(1000)
-				.help("Number of operations");
+		parser.addArgument("-n", "--num_ops").type(Integer.class).setDefault(1000).help("Number of operations");
 		parser.addArgument("-pc", "--percent_create").type(Integer.class).setDefault(100)
 				.help("Percentage of creates out of num_ops");
 		parser.addArgument("-pu", "--percent_update").type(Integer.class).setDefault(0)
