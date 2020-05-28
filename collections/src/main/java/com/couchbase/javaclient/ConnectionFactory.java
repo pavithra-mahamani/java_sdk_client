@@ -37,16 +37,12 @@ public class ConnectionFactory {
 
 	private Cluster connectCluster(String clusterName, String username, String password) {
 		try {
-			//ClusterEnvironment env = ClusterEnvironment.builder()
-			//.ioConfig(IoConfig.captureTraffic(ServiceType.VIEWS)).build();
 			environment = ClusterEnvironment.builder()
 					.compressionConfig(CompressionConfig
 					        .enable(true))
 					.loggerConfig(LoggerConfig.fallbackToConsole(false).disableSlf4J(true))
-					//.timeoutConfig(TimeoutConfig.kvTimeout(Duration.ofSeconds(5)))
+					.timeoutConfig(TimeoutConfig.kvTimeout(Duration.ofSeconds(10)))
 					.build();
-//			cluster = Cluster.connect(clusterName,
-//					ClusterOptions.clusterOptions(username, password).environment(environment));
 			cluster = Cluster.connect(clusterName,
 					ClusterOptions.clusterOptions(username, password).environment(environment));
 		} catch (Exception ex) {

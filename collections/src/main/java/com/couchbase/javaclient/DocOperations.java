@@ -31,8 +31,6 @@ public class DocOperations {
 	public static void main(String[] args) {
 		ArgumentParser parser = ArgumentParsers.newFor("Couchbase Java SDK Client For Collections").build()
 				.defaultHelp(true).description("Standalone SDK Client");
-		// final ArgumentParser parser = ArgumentParsers.newArgumentParser("Main",
-		// true);
 		// Connection params
 		parser.addArgument("-i", "--cluster").required(true).help("Couchbase cluster address");
 		parser.addArgument("-u", "--username").setDefault("Administrator").help("Username of Couchbase user");
@@ -79,6 +77,7 @@ public class DocOperations {
 	}
 
 	private static void run(Namespace ns) {
+		String port = ns.getString("port")
 		String clusterName = ns.getString("cluster");
 		String username = ns.getString("username");
 		String password = ns.getString("password");
