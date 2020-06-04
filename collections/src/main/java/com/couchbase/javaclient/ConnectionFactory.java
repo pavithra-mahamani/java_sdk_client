@@ -26,12 +26,12 @@ public class ConnectionFactory {
 	}
 
 	private Bucket connectBucket(Cluster cluster, String bucketName) {
-		try {
-			bucket = cluster.bucket(bucketName);
-			bucket.waitUntilReady(Duration.ofSeconds(30));
-		} catch (Exception ex) {
-			System.out.println("Cannot connect to bucket " + bucketName + "\n" + ex);
-		}
+		//try {
+		bucket = cluster.bucket(bucketName);
+		bucket.waitUntilReady(Duration.ofSeconds(30));
+		//} catch (Exception ex) {
+		//	System.out.println("Cannot connect to bucket " + bucketName + "\n" + ex);
+		//}
 		return bucket;
 	}
 
