@@ -41,7 +41,15 @@ public class ConnectionFactory {
 					.compressionConfig(CompressionConfig
 					        .enable(true))
 					.loggerConfig(LoggerConfig.fallbackToConsole(false).disableSlf4J(true))
-					//.timeoutConfig(TimeoutConfig.kvTimeout(Duration.ofSeconds(10)))
+					.timeoutConfig(TimeoutConfig.kvTimeout(Duration.ofSeconds(10)))
+					.ioConfig(IoConfig.
+					        kvCircuitBreakerConfig(CircuitBreakerConfig.builder()
+					            .enabled(true)
+					            .volumeThreshold(45)
+					            .errorThresholdPercentage(25)
+					            .sleepWindow(Duration.ofSeconds(1))
+					            .rollingWindow(Duration.ofMinutes(2))
+					        ))
 					.build();
 			cluster = Cluster.connect(clusterName,
 					ClusterOptions.clusterOptions(username, password).environment(environment));
