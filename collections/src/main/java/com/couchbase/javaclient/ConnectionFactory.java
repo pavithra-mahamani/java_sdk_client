@@ -6,6 +6,7 @@ import com.couchbase.client.core.env.CompressionConfig;
 import com.couchbase.client.core.env.LoggerConfig;
 import com.couchbase.client.core.env.TimeoutConfig;
 import com.couchbase.client.core.env.IoConfig;
+import com.couchbase.client.core.endpoint.CircuitBreakerConfig;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.ClusterOptions;
@@ -43,8 +44,7 @@ public class ConnectionFactory {
 					        .enable(true))
 					.loggerConfig(LoggerConfig.fallbackToConsole(false).disableSlf4J(true))
 					.timeoutConfig(TimeoutConfig.kvTimeout(Duration.ofSeconds(10)))
-					.ioConfig(IoConfig.
-					        kvCircuitBreakerConfig(CircuitBreakerConfig.builder()
+					.ioConfig(IoConfig.kvCircuitBreakerConfig(CircuitBreakerConfig.builder()
 					            .enabled(true)
 					            .volumeThreshold(45)
 					            .errorThresholdPercentage(25)
