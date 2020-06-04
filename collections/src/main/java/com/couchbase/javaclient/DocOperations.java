@@ -96,21 +96,11 @@ public class DocOperations {
 				.expiry(ns.getInt("expiry")).size(ns.getInt("size")).buildDocSpec();
 
 		ForkJoinPool pool = new ForkJoinPool();
-		ForkJoinTask<String> create;
-		ForkJoinTask<String> update;
-		ForkJoinTask<String> delete;
-		ForkJoinTask<String> retrieve;
-		if (!collectionName.equals("default")) {
-			create = ForkJoinTask.adapt(new DocCreate(dSpec, collection));
-			update = ForkJoinTask.adapt(new DocUpdate(dSpec, collection));
-			delete = ForkJoinTask.adapt(new DocDelete(dSpec, collection));
-			retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, collection));
-		} else {
-			create = ForkJoinTask.adapt(new DocCreate(dSpec, bucket));
-			update = ForkJoinTask.adapt(new DocUpdate(dSpec, bucket));
-			delete = ForkJoinTask.adapt(new DocDelete(dSpec, bucket));
-			retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, bucket));
-		}
+		ForkJoinTask<String> create = ForkJoinTask.adapt(new DocCreate(dSpec, collection));
+		ForkJoinTask<String> update = ForkJoinTask.adapt(new DocUpdate(dSpec, collection));
+		ForkJoinTask<String> delete = ForkJoinTask.adapt(new DocDelete(dSpec, collection));
+		ForkJoinTask<String> retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, collection));
+
 		try {
 			pool.invoke(create);
 			pool.invoke(update);
