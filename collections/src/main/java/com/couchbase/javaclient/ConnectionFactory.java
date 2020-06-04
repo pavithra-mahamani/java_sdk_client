@@ -36,18 +36,18 @@ public class ConnectionFactory {
 	}
 
 	private Cluster connectCluster(String clusterName, String username, String password) {
-		try {
+		//try {
 			environment = ClusterEnvironment.builder()
 					.compressionConfig(CompressionConfig
 					        .enable(true))
 					.loggerConfig(LoggerConfig.fallbackToConsole(false).disableSlf4J(true))
-					.timeoutConfig(TimeoutConfig.kvTimeout(Duration.ofSeconds(10)))
+					//.timeoutConfig(TimeoutConfig.kvTimeout(Duration.ofSeconds(10)))
 					.build();
 			cluster = Cluster.connect(clusterName,
 					ClusterOptions.clusterOptions(username, password).environment(environment));
-		} catch (Exception ex) {
-			System.out.println("Cannot connect to cluster " + clusterName + "\n" + ex);
-		}
+		//} catch (Exception ex) {
+		//	System.out.println("Cannot connect to cluster " + clusterName + "\n" + ex);
+		//}
 		return cluster;
 	}
 
