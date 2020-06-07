@@ -6,7 +6,8 @@ import com.couchbase.client.core.env.CompressionConfig;
 import com.couchbase.client.core.env.LoggerConfig;
 import com.couchbase.client.core.env.TimeoutConfig;
 import com.couchbase.client.core.env.IoConfig;
-import com.couchbase.client.core.endpoint.CircuitBreakerConfig;
+import com.couchbase.client.core.env.CoreEnvironment.*;
+import com.couchbase.client.core.cnc.Event;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.ClusterOptions;
@@ -28,56 +29,60 @@ public class ConnectionFactory {
 	}
 
 	private Bucket connectBucket(Cluster cluster, String bucketName) {
-		//try {
-		bucket = cluster.bucket(bucketName);
-		bucket.waitUntilReady(Duration.ofSeconds(30));
-		//} catch (Exception ex) {
-		//	System.out.println("Cannot connect to bucket " + bucketName + "\n" + ex);
-		//}
+		try {
+			bucket = cluster.bucket(bucketName);
+			bucket.waitUntilReady(Duration.ofSeconds(30));
+		} catch (Exception ex) {
+			this.handleException("Cannot connect to bucket " + bucketName + "\n" + ex);
+		}
 		return bucket;
 	}
 
 	private Cluster connectCluster(String clusterName, String username, String password) {
-		//try {
+		try {
 			environment = ClusterEnvironment.builder()
-					.compressionConfig(CompressionConfig
-					        .enable(true))
 					.loggerConfig(LoggerConfig.fallbackToConsole(false).disableSlf4J(true))
-					.timeoutConfig(TimeoutConfig.kvTimeout(Duration.ofSeconds(10)))
-					.ioConfig(IoConfig.kvCircuitBreakerConfig(CircuitBreakerConfig.builder()
-					            .enabled(true)
-					            .volumeThreshold(45)
-					            .errorThresholdPercentage(25)
-					            .sleepWindow(Duration.ofSeconds(1))
-					            .rollingWindow(Duration.ofMinutes(2))
-					        ))
 					.build();
+			environment.eventBus().subscribe(event -> {
+				// handle events as they arrive
+				if (event.severity() == Event.Severity.WARN) {
+					System.out.println(event);
+				}
+				if (event.severity() == Event.Severity.ERROR) {
+					System.out.println("Hit unrecoverable error..exiting \n" + event);
+					System.exit(1);
+				}
+			});
 			cluster = Cluster.connect(clusterName,
 					ClusterOptions.clusterOptions(username, password).environment(environment));
-		//} catch (Exception ex) {
-		//	System.out.println("Cannot connect to cluster " + clusterName + "\n" + ex);
-		//}
+		} catch (Exception ex) {
+			this.handleException("Cannot connect to cluster" + clusterName + "\n" + ex);
+		}
 		return cluster;
 	}
 
 	private Collection connectCollection(Bucket bucket, String scopeName, String collectionName) {
 		try {
-			if(collectionName.equalsIgnoreCase("default")) {
+			if (collectionName.equalsIgnoreCase("default")) {
 				return bucket.defaultCollection();
 			}
-			if(scopeName != null) {
+			if (scopeName != null) {
 				return bucket.scope(scopeName).collection(collectionName);
-			}			
+			}
 		} catch (Exception ex) {
-			System.out.println(
+			this.handleException(
 					"Cannot connect to collection " + bucket + '.' + scopeName + '.' + collectionName + "\n" + ex);
 		}
 		return bucket.collection(collectionName);
 	}
-	
+
 	public void close() {
-		cluster.disconnect();
-		environment.shutdown();
+		if (cluster != null) {
+			cluster.disconnect();
+		}
+		if (environment != null) {
+			environment.shutdown();
+		}
 	}
 
 	public Bucket getBucket() {
@@ -102,5 +107,11 @@ public class ConnectionFactory {
 
 	public void setCollection(Collection collection) {
 		this.collection = collection;
+	}
+
+	public void handleException(String msg) {
+		System.out.println(msg);
+		this.close();
+		System.exit(1);
 	}
 }
