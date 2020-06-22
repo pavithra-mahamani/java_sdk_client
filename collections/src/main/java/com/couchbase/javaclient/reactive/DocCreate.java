@@ -11,7 +11,7 @@ import com.couchbase.client.java.ReactiveCollection;
 import com.couchbase.client.java.manager.collection.CollectionSpec;
 import com.couchbase.client.java.manager.collection.ScopeSpec;
 import com.couchbase.javaclient.doc.DocSpec;
-import com.couchbase.javaclient.doc.Person;
+import com.couchbase.javaclient.doc.DocTemplate;
 
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -60,11 +60,12 @@ public class DocCreate implements Callable<String> {
 		num_docs = (int) (ds.get_num_ops() * ((float) ds.get_percent_create() / 100));
 		Flux<String> docsToUpsert = Flux.range(ds.get_startSeqNum(), num_docs)
 				.map(id -> ds.get_prefix() + id + ds.get_suffix());
+		DocTemplate docTemplate = new DocTemplate(ds.get_template(), ds.faker, ds.get_size());
 		System.out.println("Started upsert..");
 		try {
 			docsToUpsert.publishOn(Schedulers.elastic())
-					// .delayElements(Duration.ofMillis(5))
-					.flatMap(key -> rcollection.upsert(key, new Person().createJsonObject(ds.faker, ds.get_size()),
+					.delayElements(Duration.ofMillis(5))
+					.flatMap(key -> rcollection.upsert(key, docTemplate.createJsonObject(),
 							upsertOptions().expiry(Duration.ofSeconds(ds.get_expiry()))))
 					// Num retries, first backoff, max backoff
 					.retryBackoff(10, Duration.ofMillis(100), Duration.ofMillis(1000))

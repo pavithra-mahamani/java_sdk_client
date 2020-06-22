@@ -12,10 +12,6 @@ public class Person {
 	JsonObject jsonObject = JsonObject.create();
 	Random random = new Random();
 
-	public JsonObject getJsonObject() {
-		return jsonObject;
-	}
-
 	public JsonObject createJsonObject(Faker faker, int docsize) {
 		jsonObject.put("firstName", faker.name().firstName());
 		jsonObject.put("lastName", faker.name().lastName());

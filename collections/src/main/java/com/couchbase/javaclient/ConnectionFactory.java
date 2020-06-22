@@ -45,9 +45,9 @@ public class ConnectionFactory {
 					.build();
 			environment.eventBus().subscribe(event -> {
 				// handle events as they arrive
-				if (event.severity() == Event.Severity.WARN) {
-					System.out.println(event);
-				}
+//				if (event.severity() == Event.Severity.WARN) {
+//					System.out.println(event);
+//				}
 				if (event.severity() == Event.Severity.ERROR) {
 					System.out.println("Hit unrecoverable error..exiting \n" + event);
 					System.exit(1);
