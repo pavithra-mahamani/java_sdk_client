@@ -3,10 +3,13 @@ package com.couchbase.javaclient.doc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Date;
-
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
+import java.text.DecimalFormat;
 
 import com.couchbase.client.java.json.JsonObject;
 import com.github.javafaker.Faker;
@@ -14,60 +17,54 @@ import com.github.javafaker.Faker;
 public class Employee {
 	JsonObject jsonObject = JsonObject.create();
 	Random random = new Random();
-//	Format formatter = new SimpleDateFormat("dd-MM-yyyy");
-
-//	public JsonObject getJsonObject() {
-//		return jsonObject;
-//	}
-//	1.prefix:query-testemployee52454.55205825139
-//	2.template:{{ "name":"{0}", "join_yr":{1}, "join_mo":{2}, "join_day":{3}, "email":"{4}", "job_title":"{5}", "test_rate":{8}, "skills":{9},"VMs": {10}, "tasks_points" : {{"task1" : {6}, "task2" : {7}}}}}
-//	3.name:['employee-16']
-//	4.year:[2011]
-//	5.month:[12]
-//	6.day:[16]
-//	7.email:['16-mail@couchbase.com']
-//	8.info:['Support']
-//	9.test_rate:[1, 2, 3, 4, 5, 6, 7, 8, 9]
-//	10.[1, 2, 3, 4, 5, 6, 7, 8, 9]
-//	11.[12.12]
-//	12.skills:[['skill2010', 'skill2011']]
-//	13.vms:[[{'RAM': 12, 'os': 'ubuntu', 'name': 'vm_12', 'memory': 12}, {'RAM': 12, 'os': 'windows', 'name': 'vm_13', 'memory': 12}]]
-//	14.start:0
-//	15.end:1
-
+	Calendar calendar = new GregorianCalendar();
+	List<String> jobTitles = Arrays.asList("Engineer", "Sales", "Support");
+	List<Integer> joinYears = Arrays.asList(2010, 2011);
+	
+	/*
+	 * template: { "name": "employee-5", "join_yr": 2010, "join_mo": 8, "join_day":
+	 * 16, "email": "16-mail@couchbase.com", "job_title": "Engineer", "test_rate":
+	 * 8.08, "skills": [ "skill2010", "skill2011" ], "VMs": [ { "name": "vm_8",
+	 * "memory": "8", "os": "ubuntu", "RAM": "8" }, { "name": "vm_9", "memory": "8",
+	 * "os": "windows", "RAM": "8" } ], "tasks_points": { "task1": 0, "task2": 1 } }
+	 */
 
 	public JsonObject createJsonObject(Faker faker, int docsize) {	
-		List<String> jobTitles = Arrays.asList("Engineer", "Sales", "Support");
 		Date joinDate = faker.date().past(365*10, TimeUnit.DAYS);
+		calendar.setTime(joinDate);
+		int join_day = calendar.get(Calendar.DAY_OF_MONTH);
+		int join_month = calendar.get(Calendar.MONTH) + 1;
 		jsonObject.put("name", "employee-" + joinDate.getDay());
-		//jsonObject.put("join", formatter.format(joinDate));
-		jsonObject.put("join_yr", joinDate.getYear());
-		jsonObject.put("join_mo", joinDate.getMonth());
-		jsonObject.put("join_day", joinDate.getDay());
-		jsonObject.put("email", Integer.toString(joinDate.getDay()) + "-mail@couchbase.com");
+		jsonObject.put("join_yr", joinYears.get(random.nextInt(joinYears.size())));
+		jsonObject.put("join_mo", join_month);
+		jsonObject.put("join_day", join_day);
+		jsonObject.put("email", Integer.toString(join_day) + "-mail@couchbase.com");
 		jsonObject.put("job_title", jobTitles.get(random.nextInt(jobTitles.size())));
-		jsonObject.put("test_rate", random.nextInt(10));
+		jsonObject.put("test_rate", (float) join_month + (join_month * 0.01));
 		jsonObject.put("skills", this.getSkillsArray());
-		jsonObject.put("VMs", this.getVMsArray());
+		jsonObject.put("VMs", this.getVMsArray(join_month));
 		jsonObject.put("tasks_points", this.getTaskPoints());
-		int count = 0;
-		do {
-			count = count + 1;
-			jsonObject.put("filler" + count, faker.lorem().words(docsize / 10));
-		} while (jsonObject.toString().length() < docsize);
 		return jsonObject;
 	}
 	
-	private String getSkillsArray() {
-		return "SkillsArray";
+	private List<String> getSkillsArray() {
+		return Arrays.asList("skill2010", "skill2011");
 	}
 	
-	private String getVMsArray() {
-		return "SkillsArray";
+	private List<Map<String, String>> getVMsArray(int month) {
+		String next_month = Integer.toString(month + 1);
+		String this_month = Integer.toString(month);
+		return Arrays.asList(
+				Map.of("RAM", this_month, "os", "ubuntu", "name", "vm_" + this_month, "memory", this_month),
+				Map.of("RAM", this_month, "os", "windows", "name", "vm_" + next_month, "memory", this_month)
+				);
 	}
 	
-	private String getTaskPoints() {
-		return "SkillsArray";
+	private Map<String, Integer> getTaskPoints() {
+		 return Map.of(
+			    "task1", 0,
+			    "task2", 1
+			);
 	}
 
 }
