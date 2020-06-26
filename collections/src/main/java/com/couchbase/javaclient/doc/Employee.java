@@ -3,6 +3,7 @@ package com.couchbase.javaclient.doc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Date;
@@ -54,17 +55,24 @@ public class Employee {
 	private List<Map<String, String>> getVMsArray(int month) {
 		String next_month = Integer.toString(month + 1);
 		String this_month = Integer.toString(month);
-		return Arrays.asList(
-				Map.of("RAM", this_month, "os", "ubuntu", "name", "vm_" + this_month, "memory", this_month),
-				Map.of("RAM", this_month, "os", "windows", "name", "vm_" + next_month, "memory", this_month)
-				);
+		Map<String, String> ubuntu = new HashMap<>();
+		ubuntu.put("RAM", this_month);
+		ubuntu.put("os", "ubuntu");
+		ubuntu.put("name", "vm_" + this_month);
+		ubuntu.put("memory", this_month);
+		Map<String, String> windows = new HashMap<>();
+		windows.put("RAM", this_month);
+		windows.put("os", "windows");
+		windows.put("name", "vm_" + next_month);
+		windows.put("memory", this_month);
+		return Arrays.asList(ubuntu, windows);
 	}
 	
 	private Map<String, Integer> getTaskPoints() {
-		 return Map.of(
-			    "task1", 0,
-			    "task2", 1
-			);
+		Map<String, Integer> task = new HashMap<>();
+		task.put("task1", 0);
+		task.put("task2", 1);
+		return task;
 	}
 
 }
