@@ -10,8 +10,7 @@ import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.ReactiveCollection;
 import com.couchbase.client.java.manager.collection.CollectionSpec;
 import com.couchbase.client.java.manager.collection.ScopeSpec;
-import com.couchbase.javaclient.doc.DocSpec;
-import com.couchbase.javaclient.doc.DocTemplate;
+import com.couchbase.javaclient.doc.*;
 
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -64,7 +63,6 @@ public class DocCreate implements Callable<String> {
 		System.out.println("Started upsert..");
 		try {
 			docsToUpsert.publishOn(Schedulers.elastic())
-					.delayElements(Duration.ofMillis(5))
 					.flatMap(key -> rcollection.upsert(key, docTemplate.createJsonObject(),
 							upsertOptions().expiry(Duration.ofSeconds(ds.get_expiry()))))
 					// Num retries, first backoff, max backoff

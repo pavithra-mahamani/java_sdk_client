@@ -10,8 +10,7 @@ import java.lang.Integer;
 import java.util.concurrent.TimeUnit;
 
 import com.couchbase.client.java.json.JsonObject;
-import com.couchbase.javaclient.doc.Person;
-import com.couchbase.javaclient.doc.Employee;
+import com.couchbase.javaclient.doc.*;
 import com.github.javafaker.Faker;
 import java.lang.reflect.*;
 

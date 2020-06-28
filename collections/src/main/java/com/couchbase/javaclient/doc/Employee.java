@@ -21,6 +21,9 @@ public class Employee {
 	Calendar calendar = new GregorianCalendar();
 	List<String> jobTitles = Arrays.asList("Engineer", "Sales", "Support");
 	List<Integer> joinYears = Arrays.asList(2010, 2011);
+	Map<String, String> ubuntu = new HashMap<>();
+	Map<String, String> windows = new HashMap<>();
+	Map<String, Integer> task = new HashMap<>();
 	
 	/*
 	 * template: { "name": "employee-5", "join_yr": 2010, "join_mo": 8, "join_day":
@@ -55,12 +58,10 @@ public class Employee {
 	private List<Map<String, String>> getVMsArray(int month) {
 		String next_month = Integer.toString(month + 1);
 		String this_month = Integer.toString(month);
-		Map<String, String> ubuntu = new HashMap<>();
 		ubuntu.put("RAM", this_month);
 		ubuntu.put("os", "ubuntu");
 		ubuntu.put("name", "vm_" + this_month);
 		ubuntu.put("memory", this_month);
-		Map<String, String> windows = new HashMap<>();
 		windows.put("RAM", this_month);
 		windows.put("os", "windows");
 		windows.put("name", "vm_" + next_month);
@@ -69,7 +70,6 @@ public class Employee {
 	}
 	
 	private Map<String, Integer> getTaskPoints() {
-		Map<String, Integer> task = new HashMap<>();
 		task.put("task1", 0);
 		task.put("task2", 1);
 		return task;
