@@ -60,8 +60,8 @@ public class DocOperations {
 		parser.addArgument("-dpx", "--prefix").setDefault("doc_").help("Doc id prefix");
 		parser.addArgument("-dsx", "--suffix").setDefault("").help("Doc id suffix");
 		parser.addArgument("-dt", "--template").setDefault("Person").help("JSON document template");
-		parser.addArgument("-de", "--expiry").setDefault(0).help("Document expiry in seconds");
-		parser.addArgument("-ds", "--size").setDefault(500).help("Document size in bytes");
+		parser.addArgument("-de", "--expiry").type(Integer.class).setDefault(0).help("Document expiry in seconds");
+		parser.addArgument("-ds", "--size").type(Integer.class).setDefault(500).help("Document size in bytes");
 
 		// Output params
 		parser.addArgument("-o", "--output").setDefault("info").help("Output detail level");
