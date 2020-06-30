@@ -63,9 +63,6 @@ public class DocOperations {
 		parser.addArgument("-de", "--expiry").type(Integer.class).setDefault(0).help("Document expiry in seconds");
 		parser.addArgument("-ds", "--size").type(Integer.class).setDefault(500).help("Document size in bytes");
 
-		// Output params
-		parser.addArgument("-o", "--output").setDefault("info").help("Output detail level");
-
 		try {
 			Namespace ns = parser.parseArgs(args);
 			run(ns);
