@@ -66,7 +66,7 @@ public class DocCreate implements Callable<String> {
 					.flatMap(key -> rcollection.upsert(key, docTemplate.createJsonObject(),
 							upsertOptions().expiry(Duration.ofSeconds(ds.get_expiry()))))
 					// Num retries, first backoff, max backoff
-					.retryBackoff(10, Duration.ofMillis(100), Duration.ofMillis(1000))
+					.retryBackoff(10, Duration.ofMillis(1000), Duration.ofMillis(10000))
 					// Block until last value, complete or timeout expiry
 					.blockLast(Duration.ofMinutes(10));
 		} catch (Exception err) {
