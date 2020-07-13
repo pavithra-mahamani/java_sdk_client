@@ -58,6 +58,8 @@ public class DocOperations {
 		parser.addArgument("-st", "--start").type(Integer.class).setDefault(0).help("Starting documents operations index");
 		parser.addArgument("-en", "--end").type(Integer.class).setDefault(0).help("Ending documents operations index");
 		parser.addArgument("-fu", "--fields_to_update").type(String.class).setDefault("").help("Comma separated list of fields to update.");
+		parser.addArgument("-ac", "--all_collections").type(Boolean.class).setDefault(Boolean.FALSE).help("True: if all collections are to be exercised");
+
 		try {
 			Namespace ns = parser.parseArgs(args);
 			run(ns);
@@ -90,11 +92,23 @@ public class DocOperations {
 				.prefix(ns.getString("prefix")).suffix(ns.getString("suffix")).template(ns.getString("template"))
 				.expiry(ns.getInt("expiry")).size(ns.getInt("size")).start(ns.getInt("start")).end(ns.getInt("end")) .buildDocSpec();
 
+		ForkJoinTask<String> create = null;
+		ForkJoinTask<String> update = null;
+		ForkJoinTask<String> delete = null;
+		ForkJoinTask<String> retrieve = null;
 		ForkJoinPool pool = new ForkJoinPool();
-		ForkJoinTask<String> create = ForkJoinTask.adapt(new DocCreate(dSpec, collection));
-		ForkJoinTask<String> update = ForkJoinTask.adapt(new DocUpdate(dSpec, collection, fieldsToUpdate));
-		ForkJoinTask<String> delete = ForkJoinTask.adapt(new DocDelete(dSpec, collection));
-		ForkJoinTask<String> retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, collection));
+
+    if(ns.getBoolean("all_collections")) {
+			create = ForkJoinTask.adapt(new DocCreate(dSpec, bucket));
+			update = ForkJoinTask.adapt(new DocUpdate(dSpec, bucket, fieldsToUpdate));
+			delete = ForkJoinTask.adapt(new DocDelete(dSpec, bucket));
+			retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, bucket));
+		} else {
+			create = ForkJoinTask.adapt(new DocCreate(dSpec, collection));
+			update = ForkJoinTask.adapt(new DocUpdate(dSpec, collection, fieldsToUpdate));
+			delete = ForkJoinTask.adapt(new DocDelete(dSpec, collection));
+			retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, collection));
+		}
 		try {
 			pool.invoke(create);
 			pool.invoke(update);
