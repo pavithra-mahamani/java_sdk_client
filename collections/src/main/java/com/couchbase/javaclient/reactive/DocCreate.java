@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Collection;
@@ -58,12 +59,13 @@ public class DocCreate implements Callable<String> {
 		ReactiveCollection rcollection = collection.reactive();
 		num_docs = (int) (ds.get_num_ops() * ((float) ds.get_percent_create() / 100));
 		Flux<String> docsToUpsert = Flux.range(ds.get_startSeqNum(), num_docs)
-				.map(id -> ds.get_prefix() + id + ds.get_suffix());
-		DocTemplate docTemplate = new DocTemplate(ds.get_template(), ds.faker, ds.get_size());
+				.map(id -> (ds.get_prefix() + id + ds.get_suffix()));
+		DocTemplate docTemplate = DocTemplateFactory.getDocTemplate(ds.get_template());
 		System.out.println("Started upsert..");
+		AtomicInteger id = new AtomicInteger(1);
 		try {
 			docsToUpsert.publishOn(Schedulers.elastic())
-					.flatMap(key -> rcollection.upsert(key, docTemplate.createJsonObject(),
+					.flatMap(key -> rcollection.upsert(key, docTemplate.createJsonObject(ds.faker, ds.get_size(), id.getAndIncrement()),
 							upsertOptions().expiry(Duration.ofSeconds(ds.get_expiry()))))
 					// Num retries, first backoff, max backoff
 					.retryBackoff(10, Duration.ofMillis(1000), Duration.ofMillis(10000))

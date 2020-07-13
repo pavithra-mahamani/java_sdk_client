@@ -1,13 +1,9 @@
 package com.couchbase.javaclient.reactive;
 
-import static com.couchbase.client.java.kv.MutateInSpec.insert;
-
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.UUID;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Collection;

@@ -1,19 +1,15 @@
 package com.couchbase.javaclient;
 
-import java.time.Duration;
-
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.TimeUnit;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.Collection;
-import com.couchbase.client.java.ReactiveCollection;
-import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.javaclient.doc.DocSpec;
 import com.couchbase.javaclient.doc.DocSpecBuilder;
-import com.couchbase.javaclient.doc.Person;
 import com.couchbase.javaclient.reactive.DocCreate;
 import com.couchbase.javaclient.reactive.DocDelete;
 import com.couchbase.javaclient.reactive.DocRetrieve;
@@ -23,9 +19,6 @@ import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
-import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
-import com.github.javafaker.Faker;
 
 public class DocOperations {
 	public static void main(String[] args) {
@@ -62,7 +55,9 @@ public class DocOperations {
 		parser.addArgument("-dt", "--template").setDefault("Person").help("JSON document template");
 		parser.addArgument("-de", "--expiry").type(Integer.class).setDefault(0).help("Document expiry in seconds");
 		parser.addArgument("-ds", "--size").type(Integer.class).setDefault(500).help("Document size in bytes");
-
+		parser.addArgument("-st", "--start").type(Integer.class).setDefault(0).help("Starting documents operations index");
+		parser.addArgument("-en", "--end").type(Integer.class).setDefault(0).help("Ending documents operations index");
+		parser.addArgument("-fu", "--fields_to_update").type(String.class).setDefault("").help("Comma separated list of fields to update.");
 		try {
 			Namespace ns = parser.parseArgs(args);
 			run(ns);
@@ -78,6 +73,9 @@ public class DocOperations {
 		String bucketName = ns.getString("bucket");
 		String scopeName = ns.getString("scope");
 		String collectionName = ns.getString("collection");
+		String fieldsToUpdateStr = ns.getString("fields_to_update");
+		List<String> fieldsToUpdate = Arrays.asList(fieldsToUpdateStr.split(","));
+
 
 		ConnectionFactory connection = new ConnectionFactory(clusterName, username, password, bucketName, scopeName,
 				collectionName);
@@ -90,11 +88,11 @@ public class DocOperations {
 				.percentUpdate(ns.getInt("percent_update")).percentDelete(ns.getInt("percent_delete"))
 				.loadPattern(ns.getString("load_pattern")).startSeqNum(ns.getInt("start_seq_num"))
 				.prefix(ns.getString("prefix")).suffix(ns.getString("suffix")).template(ns.getString("template"))
-				.expiry(ns.getInt("expiry")).size(ns.getInt("size")).buildDocSpec();
+				.expiry(ns.getInt("expiry")).size(ns.getInt("size")).start(ns.getInt("start")).end(ns.getInt("end")) .buildDocSpec();
 
 		ForkJoinPool pool = new ForkJoinPool();
 		ForkJoinTask<String> create = ForkJoinTask.adapt(new DocCreate(dSpec, collection));
-		ForkJoinTask<String> update = ForkJoinTask.adapt(new DocUpdate(dSpec, collection));
+		ForkJoinTask<String> update = ForkJoinTask.adapt(new DocUpdate(dSpec, collection, fieldsToUpdate));
 		ForkJoinTask<String> delete = ForkJoinTask.adapt(new DocDelete(dSpec, collection));
 		ForkJoinTask<String> retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, collection));
 		try {
