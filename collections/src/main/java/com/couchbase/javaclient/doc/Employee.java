@@ -1,6 +1,5 @@
 package com.couchbase.javaclient.doc;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.HashMap;
@@ -10,12 +9,11 @@ import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
-import java.text.DecimalFormat;
 
 import com.couchbase.client.java.json.JsonObject;
 import com.github.javafaker.Faker;
 
-public class Employee {
+public class Employee implements DocTemplate{
 	JsonObject jsonObject = JsonObject.create();
 	Random random = new Random();
 	Calendar calendar = new GregorianCalendar();
@@ -33,7 +31,7 @@ public class Employee {
 	 * "os": "windows", "RAM": "8" } ], "tasks_points": { "task1": 0, "task2": 1 } }
 	 */
 
-	public JsonObject createJsonObject(Faker faker, int docsize) {	
+	public JsonObject createJsonObject(Faker faker, int docsize, int id) {
 		Date joinDate = faker.date().past(365*10, TimeUnit.DAYS);
 		calendar.setTime(joinDate);
 		int join_day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -50,7 +48,13 @@ public class Employee {
 		jsonObject.put("tasks_points", this.getTaskPoints());
 		return jsonObject;
 	}
-	
+
+
+	public Object updateJsonObject(String field) {
+		return null;
+	}
+
+
 	private List<String> getSkillsArray() {
 		return Arrays.asList("skill2010", "skill2011");
 	}
