@@ -62,6 +62,7 @@ public class DocOperations {
 		parser.addArgument("-dt", "--template").setDefault("Person").help("JSON document template");
 		parser.addArgument("-de", "--expiry").type(Integer.class).setDefault(0).help("Document expiry in seconds");
 		parser.addArgument("-ds", "--size").type(Integer.class).setDefault(500).help("Document size in bytes");
+		parser.addArgument("-ac", "--all_collections").type(Boolean.class).setDefault(Boolean.FALSE).help("True: if all collections are to be exercised");
 
 		try {
 			Namespace ns = parser.parseArgs(args);
@@ -92,11 +93,22 @@ public class DocOperations {
 				.prefix(ns.getString("prefix")).suffix(ns.getString("suffix")).template(ns.getString("template"))
 				.expiry(ns.getInt("expiry")).size(ns.getInt("size")).buildDocSpec();
 
+		ForkJoinTask<String> create = null;
+		ForkJoinTask<String> update = null;
+		ForkJoinTask<String> delete = null;
+		ForkJoinTask<String> retrieve = null;
 		ForkJoinPool pool = new ForkJoinPool();
-		ForkJoinTask<String> create = ForkJoinTask.adapt(new DocCreate(dSpec, collection));
-		ForkJoinTask<String> update = ForkJoinTask.adapt(new DocUpdate(dSpec, collection));
-		ForkJoinTask<String> delete = ForkJoinTask.adapt(new DocDelete(dSpec, collection));
-		ForkJoinTask<String> retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, collection));
+		if(ns.getBoolean("all_collections")) {
+			create = ForkJoinTask.adapt(new DocCreate(dSpec, bucket));
+			update = ForkJoinTask.adapt(new DocUpdate(dSpec, bucket));
+			delete = ForkJoinTask.adapt(new DocDelete(dSpec, bucket));
+			retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, bucket));
+		} else {
+			create = ForkJoinTask.adapt(new DocCreate(dSpec, collection));
+			update = ForkJoinTask.adapt(new DocUpdate(dSpec, collection));
+			delete = ForkJoinTask.adapt(new DocDelete(dSpec, collection));
+			retrieve = ForkJoinTask.adapt(new DocRetrieve(dSpec, collection));
+		}
 		try {
 			pool.invoke(create);
 			pool.invoke(update);
