@@ -60,9 +60,9 @@ public class DocCreate implements Callable<String> {
 		num_docs = (int) (ds.get_num_ops() * ((float) ds.get_percent_create() / 100));
 		Flux<String> docsToUpsert = Flux.range(ds.get_startSeqNum(), num_docs)
 				.map(id -> (ds.get_prefix() + id + ds.get_suffix()));
-		DocTemplate docTemplate = DocTemplateFactory.getDocTemplate(ds.get_template());
+		DocTemplate docTemplate = DocTemplateFactory.getDocTemplate(ds);
 		System.out.println("Started upsert..");
-		AtomicInteger id = new AtomicInteger(1);
+		AtomicInteger id = new AtomicInteger(0);
 		try {
 			docsToUpsert.publishOn(Schedulers.elastic())
 					.flatMap(key -> rcollection.upsert(key, docTemplate.createJsonObject(ds.faker, ds.get_size(), id.getAndIncrement()),

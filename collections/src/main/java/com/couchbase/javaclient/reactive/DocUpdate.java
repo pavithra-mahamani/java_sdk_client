@@ -1,6 +1,6 @@
 package com.couchbase.javaclient.reactive;
 
-import static com.couchbase.client.java.kv.MutateInSpec.upsert;
+import static com.couchbase.client.java.kv.UpsertOptions.upsertOptions;
 
 import java.time.Duration;
 import java.util.*;
@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.ReactiveCollection;
-import com.couchbase.client.java.kv.MutateInSpec;
 import com.couchbase.client.java.manager.collection.CollectionSpec;
 import com.couchbase.client.java.manager.collection.ScopeSpec;
 import com.couchbase.javaclient.doc.DocSpec;
@@ -71,27 +70,16 @@ public class DocUpdate implements Callable<String> {
 	public void update(DocSpec ds, Collection collection, List<String> fieldsToUpdate) {
 		ReactiveCollection rcollection = collection.reactive();
 		num_docs = (int) (ds.get_num_ops() * ((float) ds.get_percent_update() / 100));
-		DocTemplate docTemplate = DocTemplateFactory.getDocTemplate(ds.get_template());
+		DocTemplate docTemplate = DocTemplateFactory.getDocTemplate(ds);
 		Flux<String> docsToUpdate = Flux.range(ds.get_startSeqNum(), num_docs)
 				.map(id -> ds.get_prefix() + id + ds.get_suffix());
 		System.out.println("Started update..");
 		try {
-			Map<String, List<MutateInSpec>> upsertMap = new HashMap<>();
-			for (String id: docsToUpdate.toIterable()) {
-				List<MutateInSpec> upsertList = new ArrayList<>();
-				for (String field : fieldsToUpdate) {
-					upsertList.add(upsert(field, docTemplate.updateJsonObject(field)));
-				}
-				upsertMap.put(id, upsertList);
-			}
 			docsToUpdate.publishOn(Schedulers.elastic())
-					// .delayElements(Duration.ofMillis(5))
-					.flatMap(key -> rcollection.mutateIn(key,
-							//docTemplate.updateJsonObject(key, )
-							upsertMap.get(key)
-					))
+					.flatMap(key -> rcollection.upsert(key, docTemplate.updateJsonObject(collection.get(key).contentAsObject(), fieldsToUpdate),
+							upsertOptions().expiry(Duration.ofSeconds(ds.get_expiry()))))
 					// Num retries, first backoff, max backoff
-					.retryBackoff(10, Duration.ofMillis(100), Duration.ofMillis(1000))
+					.retryBackoff(10, Duration.ofMillis(1000), Duration.ofMillis(1000))
 					// Block until last value, complete or timeout expiry
 					.blockLast(Duration.ofMinutes(10));
 		} catch (Exception err) {

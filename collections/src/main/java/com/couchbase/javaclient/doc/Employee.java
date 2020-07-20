@@ -22,7 +22,7 @@ public class Employee implements DocTemplate{
 	Map<String, String> ubuntu = new HashMap<>();
 	Map<String, String> windows = new HashMap<>();
 	Map<String, Integer> task = new HashMap<>();
-	
+
 	/*
 	 * template: { "name": "employee-5", "join_yr": 2010, "join_mo": 8, "join_day":
 	 * 16, "email": "16-mail@couchbase.com", "job_title": "Engineer", "test_rate":
@@ -50,15 +50,15 @@ public class Employee implements DocTemplate{
 	}
 
 
-	public Object updateJsonObject(String field) {
-		return null;
+	public Object updateJsonObject(JsonObject obj, List<String> fieldsToUpdate) {
+		return obj;
 	}
 
 
 	private List<String> getSkillsArray() {
 		return Arrays.asList("skill2010", "skill2011");
 	}
-	
+
 	private List<Map<String, String>> getVMsArray(int month) {
 		String next_month = Integer.toString(month + 1);
 		String this_month = Integer.toString(month);
@@ -72,7 +72,7 @@ public class Employee implements DocTemplate{
 		windows.put("memory", this_month);
 		return Arrays.asList(ubuntu, windows);
 	}
-	
+
 	private Map<String, Integer> getTaskPoints() {
 		task.put("task1", 0);
 		task.put("task2", 1);

@@ -1,4 +1,4 @@
-    package com.couchbase.javaclient.doc;
+package com.couchbase.javaclient.doc;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Calendar;
 
 import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.kv.GetResult;
 import com.github.javafaker.Faker;
 
 public class Emp implements DocTemplate{
@@ -76,22 +77,43 @@ public class Emp implements DocTemplate{
         return jsonObject;
     }
 
-    public Object updateJsonObject(String field) {
-        if(field.equals("salary")){
-            return generateSalary();
+    public JsonObject updateJsonObject(JsonObject obj, List<String> fieldsToUpdate) {
+        if(fieldsToUpdate == null || fieldsToUpdate.size() == 0){
+            obj.put("salary", generateSalary());
+            obj.put("mutated", 1);
+            return obj;
         }
-        if(field.equals("dept")){
-            return generateDept();
+        if(fieldsToUpdate.contains("salary")){
+            obj.put("salary", generateSalary());
         }
+        if(fieldsToUpdate.contains("dept")){
+            obj.put("dept", generateDept());
+        }
+        if(fieldsToUpdate.contains("is_manager")){
+            obj.put("is_manager", random.nextBoolean());
+        }
+        if(obj.getBoolean("is_manager")){
+            if(fieldsToUpdate.contains("manages.team_size") || fieldsToUpdate.contains("manages.reports")){
+                JsonObject manages = JsonObject.create();
+                int teamSize = 5 + random.nextInt(5);
+                manages.put("team_size", teamSize);
+                List<String> reports = new ArrayList<>();
+                for(int i=0; i<teamSize; i++){
+                    reports.add(generateName());
+                }
+                manages.put("reports", reports);
+                obj.put("manages", manages);
 
-        boolean isManager = random.nextBoolean();
-        if(field.equals("is_manager")){
-            return isManager;
+            }
         }
-        if(field.equals("languages_known")){
-            return generateLangKnown();
+        if(fieldsToUpdate.contains("languages_known")){
+            obj.put("languages_known", generateLangKnown());
         }
-        return null;
+        if(fieldsToUpdate.contains("email")){
+            obj.put("email", generateName().split(" ")[0] + "@mcdiabetes.com");
+        }
+        obj.put("mutated", 1);
+        return obj;
     }
 
 

@@ -70,7 +70,7 @@ public class DocDelete implements Callable<String> {
 		try {
 			docsToDelete.publishOn(Schedulers.elastic())
 					// .delayElements(Duration.ofMillis(5))
-					.flatMap(key -> rcollection.remove(key))
+					.flatMap(rcollection::remove)
 					// Num retries, first backoff, max backoff
 					.retryBackoff(10, Duration.ofMillis(100), Duration.ofMillis(1000))
 					// Block until last value, complete or timeout expiry

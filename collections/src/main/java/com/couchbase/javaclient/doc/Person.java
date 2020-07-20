@@ -1,5 +1,6 @@
 package com.couchbase.javaclient.doc;
 
+import java.util.List;
 import java.util.Random;
 
 import com.couchbase.client.java.json.JsonObject;
@@ -27,9 +28,8 @@ public class Person implements DocTemplate{
 	}
 
 	@Override
-	public Object updateJsonObject(String field) {
-		return null;
+	public Object updateJsonObject(JsonObject obj, List<String> fieldsToUpdate) {
+		return obj;
 	}
-
 
 }

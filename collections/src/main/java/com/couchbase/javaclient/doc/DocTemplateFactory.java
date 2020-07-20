@@ -2,16 +2,18 @@ package com.couchbase.javaclient.doc;
 
 
 public final class DocTemplateFactory {
-	public static DocTemplate getDocTemplate(final String dataset) {
-		if ("Emp".equals(dataset)) {
+
+	public static DocTemplate getDocTemplate(DocSpec ds) {
+		if ("emp".equals(ds.get_template())) {
 			return new Emp();
-		}else if("Employee".equals(dataset)){
+		}else if("Employee".equals(ds.get_template())){
 			return new Employee();
-		}else  if("Person".equals(dataset)){
+		}else  if("Person".equals(ds.get_template())){
 			return new Person();
-		}else{
-			throw new RuntimeException("Unknown dataset - " + dataset);
+		}else {
+			return new TextDataSet(ds);
 		}
 	}
+
 }
 

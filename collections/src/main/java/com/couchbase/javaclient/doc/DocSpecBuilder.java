@@ -14,13 +14,14 @@ public class DocSpecBuilder {
 	int _size;
 	int _start;
 	int _end;
+	String dataFile;
 
 	public DocSpecBuilder() {
 	}
 
 	public DocSpec buildDocSpec() {
 		return new DocSpec(_num_ops, _percent_create, _percent_update, _percent_delete, _load_pattern, _startSeqNum,
-				_prefix, _suffix, _template, _expiry, _size, _start, _end);
+				_prefix, _suffix, _template, _expiry, _size, _start, _end, dataFile);
 	}
 
 	public DocSpecBuilder loadPattern(String _load_pattern) {
@@ -82,8 +83,14 @@ public class DocSpecBuilder {
 		this._start = _start;
 		return this;
 	}
+
 	public DocSpecBuilder end(int _end) {
 		this._end = _end;
+		return this;
+	}
+
+	public DocSpecBuilder dataFile(String dataFile) {
+		this.dataFile = dataFile;
 		return this;
 	}
 }
