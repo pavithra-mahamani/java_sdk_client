@@ -18,7 +18,7 @@ public class TextDataSet implements DocTemplate {
 
     TextDataSet(DocSpec docSpec) {
         this.dataSetName = docSpec.get_template();
-        readFile(docSpec.getDataFile(), docSpec.get_num_ops(), records);
+        readFile(docSpec.getDataFile(), docSpec.get_num_ops());
     }
 
     protected void parseAndStoreJsonObject(org.json.simple.JSONObject simpleJson){
@@ -38,10 +38,9 @@ public class TextDataSet implements DocTemplate {
         return obj;
     }
 
-    private void readFile (String path, int numOps, List<JsonObject> records) {
+    private void readFile (String path, int numOps) {
         JSONParser jsonParser = new JSONParser();
 
-        int i = 1;
         int count = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
 
@@ -57,15 +56,14 @@ public class TextDataSet implements DocTemplate {
                 } catch (Exception e) {
                     count++;
                 }
-                if (records.size() >= numOps) {
+                if (records.size() > numOps) {
                     return;
                 }
-                i++;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        i = 0;
+        int i = 0;
         while (records.size() < numOps) {
             records.add(records.get(i++));
         }

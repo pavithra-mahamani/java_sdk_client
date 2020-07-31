@@ -91,8 +91,8 @@ public final class FileUtils {
                         localFile = FRWIKI_FILE;
                         break;
                 }
-                localArchiveFile = localFile + ".gz";
             }
+            localArchiveFile = localFile + ".gz";
             localFileName = loadDataFile(localArchiveFile, remotePath, localFile, docTemplate);
         }
         return localFileName;

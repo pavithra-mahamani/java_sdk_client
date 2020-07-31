@@ -1,0 +1,7 @@
+.DS_Store
+collections/.idea/
+collections/target/
+collections/napa*
+collections/enwiki*
+collections/transformed-*
+collections/*.iml

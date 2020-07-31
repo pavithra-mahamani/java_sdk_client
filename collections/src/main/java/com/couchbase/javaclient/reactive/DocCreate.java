@@ -62,10 +62,11 @@ public class DocCreate implements Callable<String> {
 				.map(id -> (ds.get_prefix() + id + ds.get_suffix()));
 		DocTemplate docTemplate = DocTemplateFactory.getDocTemplate(ds);
 		System.out.println("Started upsert..");
-		AtomicInteger id = new AtomicInteger(0);
+		//AtomicInteger id = new AtomicInteger(1);
 		try {
 			docsToUpsert.publishOn(Schedulers.elastic())
-					.flatMap(key -> rcollection.upsert(key, docTemplate.createJsonObject(ds.faker, ds.get_size(), id.getAndIncrement()),
+					.flatMap(key -> rcollection.upsert(key, docTemplate.createJsonObject(ds.faker, ds.get_size(),
+							extractId(key)),
 							upsertOptions().expiry(Duration.ofSeconds(ds.get_expiry()))))
 					// Num retries, first backoff, max backoff
 					.retryBackoff(10, Duration.ofMillis(1000), Duration.ofMillis(10000))
@@ -85,5 +86,9 @@ public class DocCreate implements Callable<String> {
 			upsertBucketCollections(ds, bucket);
 		}
 		return num_docs + " DOCS CREATED!";
+	}
+
+	private int extractId(String key) {
+		return Integer.parseInt(key.replace(ds.get_prefix(), "").replace(ds.get_suffix(), ""));
 	}
 }
