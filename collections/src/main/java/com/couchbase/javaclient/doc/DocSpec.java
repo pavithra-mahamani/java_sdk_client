@@ -16,11 +16,13 @@ public class DocSpec {
 	int _size;
 	int _start;
 	int _end;
-	String dataFile;
+	String _dataFile;
+	boolean _shuffle_docs;
 	public static Faker faker = new Faker();
 
 	public DocSpec(int _num_ops, int _percent_create, int _percent_update, int _percent_delete, String _load_pattern,
-				   int _startSeqNum, String _prefix, String _suffix, String _template, int _expiry, int _size, int start, int end, String dataFile) {
+			int _startSeqNum, String _prefix, String _suffix, String _template, int _expiry, int _size, int _start,
+			int _end, String _dataFile, boolean _shuffle_docs) {
 
 		this._num_ops = _num_ops;
 		this._percent_create = _percent_create;
@@ -33,9 +35,10 @@ public class DocSpec {
 		this._template = _template;
 		this._expiry = _expiry;
 		this._size = _size;
-		this._start = start;
-		this._end = end;
-		this.dataFile = dataFile;
+		this._start = _start;
+		this._end = _end;
+		this._dataFile = _dataFile;
+		this._shuffle_docs = _shuffle_docs;
 	}
 
 	public int get_num_ops() {
@@ -81,10 +84,22 @@ public class DocSpec {
 	public int get_size() {
 		return _size;
 	}
+	
+	public int get_start() {
+		return _start;
+	}
+	
+	public int get_end() {
+		return _end;
+	}
 
-	public String getDataFile(){ return this.dataFile; }
-
-	public void setDataFile(String dataFile){ this.dataFile = dataFile; }
+	public String getDataFile() {
+		return _dataFile;
+	}
+	
+	public boolean get_shuffle_docs() {
+		return _shuffle_docs;
+	}
 
 	public void set_num_ops(int _num_ops) {
 		this._num_ops = _num_ops;
@@ -128,5 +143,21 @@ public class DocSpec {
 
 	public void set_size(int _size) {
 		this._size = _size;
+	}
+	
+	public void set_start() {
+		this._start = _start;
+	}
+	
+	public void set_end() {
+		this._end = _end;
+	}
+	
+	public void setDataFile(String _dataFile) {
+		this._dataFile = _dataFile;
+	}
+	
+	public void set_shuffle_docs() {
+		this._shuffle_docs = _shuffle_docs;
 	}
 }

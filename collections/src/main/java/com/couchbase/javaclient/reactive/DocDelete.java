@@ -66,6 +66,11 @@ public class DocDelete implements Callable<String> {
 		num_docs = (int) (ds.get_num_ops() * ((float) ds.get_percent_delete() / 100));
 		Flux<String> docsToDelete = Flux.range(ds.get_startSeqNum(), num_docs)
 				.map(id -> ds.get_prefix() + id + ds.get_suffix());
+		if(ds.get_shuffle_docs()){
+			List<String> docs = docsToDelete.collectList().block();
+			java.util.Collections.shuffle(docs);
+			docsToDelete = Flux.fromIterable(docs);
+		}
 		System.out.println("Started delete..");
 		try {
 			docsToDelete.publishOn(Schedulers.elastic())

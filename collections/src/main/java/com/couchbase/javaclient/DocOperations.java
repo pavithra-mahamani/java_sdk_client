@@ -62,6 +62,7 @@ public class DocOperations {
 		parser.addArgument("-fu", "--fields_to_update").type(String.class).setDefault("").help("Comma separated list of fields to update.");
 		parser.addArgument("-ac", "--all_collections").type(Boolean.class).setDefault(Boolean.FALSE).help("True: if all collections are to be exercised");
 		parser.addArgument("-ln", "--language").type(String.class).setDefault("en").help("Locale for wiki datased");
+		parser.addArgument("-sd", "--shuffle_docs").type(Boolean.class).setDefault(Boolean.FALSE).help("if true, shuffle docs, else operate sequentially");
 
 		try {
 			Namespace ns = parser.parseArgs(args);
@@ -79,13 +80,11 @@ public class DocOperations {
 		String bucketName = ns.getString("bucket");
 		String scopeName = ns.getString("scope");
 		String collectionName = ns.getString("collection");
+		
 		String fieldsToUpdateStr = ns.getString("fields_to_update");
-
 		String lang = ns.getString("language");
 		String docTemplate = ns.getString("template");
-
 		String preparedDataFile = FileUtils.getDataFilePrepared(docTemplate, lang);
-
 		List<String> fieldsToUpdate = Arrays.asList(fieldsToUpdateStr.split(","));
 
 		ConnectionFactory connection = new ConnectionFactory(clusterName, username, password, bucketName, scopeName,
@@ -97,7 +96,8 @@ public class DocOperations {
 				.percentUpdate(ns.getInt("percent_update")).percentDelete(ns.getInt("percent_delete"))
 				.loadPattern(ns.getString("load_pattern")).startSeqNum(ns.getInt("start_seq_num"))
 				.prefix(ns.getString("prefix")).suffix(ns.getString("suffix")).template(ns.getString("template"))
-				.expiry(ns.getInt("expiry")).size(ns.getInt("size")).start(ns.getInt("start")).end(ns.getInt("end")).dataFile(preparedDataFile) .buildDocSpec();
+				.expiry(ns.getInt("expiry")).size(ns.getInt("size")).start(ns.getInt("start")).end(ns.getInt("end"))
+				.dataFile(preparedDataFile).shuffleDocs(ns.getBoolean("shuffle_docs")).buildDocSpec();
 
 
 		ForkJoinTask<String> create = null;

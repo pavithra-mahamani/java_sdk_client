@@ -88,6 +88,9 @@ public class DocRetrieve implements Callable<String> {
 			key = ds.get_prefix() + id + ds.get_suffix();
 			docsToFetchList.add(key);
 		}
+		if(ds.get_shuffle_docs()){
+			java.util.Collections.shuffle(docsToFetchList);
+		}
 		List<GetResult> actual_docs = Flux.fromIterable(docsToFetchList).flatMap(id -> rcollection.get(id))
 				// Num retries, first backoff, max backoff
 				.retryBackoff(20, Duration.ofMillis(1000), Duration.ofMillis(10000))

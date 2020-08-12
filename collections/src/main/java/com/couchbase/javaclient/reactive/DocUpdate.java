@@ -3,7 +3,8 @@ package com.couchbase.javaclient.reactive;
 import static com.couchbase.client.java.kv.UpsertOptions.upsertOptions;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import com.couchbase.client.java.Bucket;
@@ -73,6 +74,11 @@ public class DocUpdate implements Callable<String> {
 		DocTemplate docTemplate = DocTemplateFactory.getDocTemplate(ds);
 		Flux<String> docsToUpdate = Flux.range(ds.get_startSeqNum(), num_docs)
 				.map(id -> ds.get_prefix() + id + ds.get_suffix());
+		if(ds.get_shuffle_docs()){
+			List<String> docs = docsToUpdate.collectList().block();
+			java.util.Collections.shuffle(docs);
+			docsToUpdate = Flux.fromIterable(docs);
+		}
 		System.out.println("Started update..");
 		try {
 			docsToUpdate.publishOn(Schedulers.elastic())

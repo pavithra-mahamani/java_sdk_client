@@ -14,14 +14,15 @@ public class DocSpecBuilder {
 	int _size;
 	int _start;
 	int _end;
-	String dataFile;
+	String _dataFile;
+	boolean _shuffleDocs;
 
 	public DocSpecBuilder() {
 	}
 
 	public DocSpec buildDocSpec() {
 		return new DocSpec(_num_ops, _percent_create, _percent_update, _percent_delete, _load_pattern, _startSeqNum,
-				_prefix, _suffix, _template, _expiry, _size, _start, _end, dataFile);
+				_prefix, _suffix, _template, _expiry, _size, _start, _end, _dataFile, _shuffleDocs);
 	}
 
 	public DocSpecBuilder loadPattern(String _load_pattern) {
@@ -89,8 +90,13 @@ public class DocSpecBuilder {
 		return this;
 	}
 
-	public DocSpecBuilder dataFile(String dataFile) {
-		this.dataFile = dataFile;
+	public DocSpecBuilder dataFile(String _dataFile) {
+		this._dataFile = _dataFile;
+		return this;
+	}
+	
+	public DocSpecBuilder shuffleDocs(boolean _shuffleDocs) {
+		this._shuffleDocs = _shuffleDocs;
 		return this;
 	}
 }
