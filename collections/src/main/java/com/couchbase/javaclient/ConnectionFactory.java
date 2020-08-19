@@ -2,6 +2,12 @@ package com.couchbase.javaclient;
 
 import java.time.Duration;
 
+//import com.couchbase.client.core.env.Logger;
+import java.util.logging.Level; 
+import java.util.logging.Logger;
+import java.util.logging.Handler;
+import java.util.logging.ConsoleHandler;
+
 import com.couchbase.client.core.env.LoggerConfig;
 import com.couchbase.client.core.cnc.Event;
 import com.couchbase.client.java.Bucket;
@@ -35,15 +41,18 @@ public class ConnectionFactory {
 	}
 
 	private Cluster connectCluster(String clusterName, String username, String password) {
+		Logger logger = Logger.getLogger("com.couchbase.client");
+        logger.setLevel(Level.SEVERE);
+        for(Handler h : logger.getParent().getHandlers()) {
+            if(h instanceof ConsoleHandler){
+                h.setLevel(Level.SEVERE);
+            }
+        }
 		try {
 			environment = ClusterEnvironment.builder()
-					.loggerConfig(LoggerConfig.fallbackToConsole(false).disableSlf4J(true))
+					.loggerConfig(LoggerConfig.disableSlf4J(true))
 					.build();
 			environment.eventBus().subscribe(event -> {
-				// handle events as they arrive
-//				if (event.severity() == Event.Severity.WARN) {
-//					System.out.println(event);
-//				}
 				if (event.severity() == Event.Severity.ERROR) {
 					System.out.println("Hit unrecoverable error..exiting \n" + event);
 					System.exit(1);

@@ -81,7 +81,6 @@ public class DocRetrieve implements Callable<String> {
 			System.out.println(key + " not found. Skipping delete");
 		}
 		Flux<String> docsToDelete = Flux.fromIterable(docsToDeleteList);
-
 		List<String> docsToFetchList = new ArrayList<>();
 
 		for (int id = ds.get_startSeqNum() + deleted_docs; id <= created_docs; id++) {

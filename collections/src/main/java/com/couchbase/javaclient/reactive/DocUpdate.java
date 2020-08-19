@@ -84,6 +84,7 @@ public class DocUpdate implements Callable<String> {
 			docsToUpdate.publishOn(Schedulers.elastic())
 					.flatMap(key -> rcollection.upsert(key, docTemplate.updateJsonObject(collection.get(key).contentAsObject(), fieldsToUpdate),
 							upsertOptions().expiry(Duration.ofSeconds(ds.get_expiry()))))
+					.log()
 					// Num retries, first backoff, max backoff
 					.retryBackoff(10, Duration.ofMillis(1000), Duration.ofMillis(1000))
 					// Block until last value, complete or timeout expiry
