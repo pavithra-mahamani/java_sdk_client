@@ -28,7 +28,7 @@ public class Person implements DocTemplate{
 	}
 
 	@Override
-	public Object updateJsonObject(JsonObject obj, List<String> fieldsToUpdate) {
+	public JsonObject updateJsonObject(JsonObject obj, List<String> fieldsToUpdate) {
 		return obj;
 	}
 

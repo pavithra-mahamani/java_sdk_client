@@ -1,16 +1,18 @@
 package com.couchbase.javaclient.reactive;
 
+import java.io.File;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.ReactiveCollection;
+import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.manager.collection.CollectionSpec;
 import com.couchbase.client.java.manager.collection.ScopeSpec;
 import com.couchbase.javaclient.doc.*;
+import com.couchbase.javaclient.utils.FileUtils;
 
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -21,6 +23,7 @@ public class DocCreate implements Callable<String> {
 	private Bucket bucket;
 	private Collection collection;
 	private static int num_docs = 0;
+	private Map<String, String> elasticMap = new HashMap<>();
 
 	public DocCreate(DocSpec _ds, Bucket _bucket) {
 		ds = _ds;
@@ -66,10 +69,10 @@ public class DocCreate implements Callable<String> {
 		}
 		DocTemplate docTemplate = DocTemplateFactory.getDocTemplate(ds);
 		System.out.println("Started upsert..");
+
 		try {
 			docsToUpsert.publishOn(Schedulers.elastic())
-					.flatMap(key -> rcollection.upsert(key, docTemplate.createJsonObject(ds.faker, ds.get_size(),
-							extractId(key)),
+					.flatMap(key -> rcollection.upsert(key, getObject(key, docTemplate, elasticMap),
 							upsertOptions().expiry(Duration.ofSeconds(ds.get_expiry()))))
 					.log()
 					// Num retries, first backoff, max backoff
@@ -82,12 +85,22 @@ public class DocCreate implements Callable<String> {
 		System.out.println("Completed upsert");
 	}
 
+	private JsonObject getObject(String key, DocTemplate docTemplate, Map<String, String> elasticMap) {
+		JsonObject obj = docTemplate.createJsonObject(ds.faker, ds.get_size(), extractId(key));
+		elasticMap.put(key, obj.toString());
+		return obj;
+	}
+
 	@Override
-	public String call() throws Exception {
+	public String call() throws Error {
 		if (collection != null) {
 			upsertCollection(ds, collection);
 		} else {
 			upsertBucketCollections(ds, bucket);
+		}
+		if (ds.isElasticSync() && !elasticMap.isEmpty()) {
+			File elasticFile = FileUtils.writeForElastic(elasticMap, ds.get_template(), "create");
+			ElasticSync.sync(ds.getElasticIP(), ds.getElasticPort(), ds.getElasticLogin(), ds.getElasticPassword(), elasticFile, 5);
 		}
 		return num_docs + " DOCS CREATED!";
 	}

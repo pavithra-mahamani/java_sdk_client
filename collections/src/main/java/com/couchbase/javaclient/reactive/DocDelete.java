@@ -1,18 +1,24 @@
 package com.couchbase.javaclient.reactive;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.ReactiveCollection;
+import com.couchbase.client.java.kv.MutationResult;
 import com.couchbase.client.java.manager.collection.CollectionSpec;
 import com.couchbase.client.java.manager.collection.ScopeSpec;
 import com.couchbase.javaclient.doc.DocSpec;
 
+import com.couchbase.javaclient.utils.FileUtils;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 public class DocDelete implements Callable<String> {
@@ -21,6 +27,7 @@ public class DocDelete implements Callable<String> {
 	private Collection collection;
 	private static int num_docs = 0;
 	private boolean done = false;
+	private Map<String, String> elasticMap = new HashMap<>();
 
 	public DocDelete(DocSpec _ds, Bucket _bucket) {
 		ds = _ds;
@@ -38,6 +45,11 @@ public class DocDelete implements Callable<String> {
 			deleteCollection(ds, collection);
 		} else {
 			deleteBucketCollections(ds, bucket);
+		}
+		// delete from elastic
+		if (ds.isElasticSync() && !elasticMap.isEmpty()) {
+			File elasticFile = FileUtils.writeForElastic(elasticMap, ds.get_template(), "delete");
+			ElasticSync.sync(ds.getElasticIP(), ds.getElasticPort(), ds.getElasticLogin(), ds.getElasticPassword(), elasticFile, 5);
 		}
 		done = true;
 		return num_docs + " DOCS UPDATED!";
@@ -75,7 +87,7 @@ public class DocDelete implements Callable<String> {
 		try {
 			docsToDelete.publishOn(Schedulers.elastic())
 					// .delayElements(Duration.ofMillis(5))
-					.flatMap(rcollection::remove)
+					.flatMap(id -> wrap(rcollection, id, elasticMap))
 					.log()
 					// Num retries, first backoff, max backoff
 					.retryBackoff(10, Duration.ofMillis(100), Duration.ofMillis(1000))
@@ -84,6 +96,12 @@ public class DocDelete implements Callable<String> {
 		} catch (Exception err) {
 			err.printStackTrace();
 		}
+
 		System.out.println("Completed delete");
+	}
+
+	private Mono<MutationResult> wrap(ReactiveCollection rcollection, String id, final Map<String, String> elasticMap) {
+		elasticMap.put(id, null);
+		return rcollection.remove(id);
 	}
 }

@@ -97,7 +97,7 @@ public class DocRetrieve implements Callable<String> {
 				// Block until last value, complete or timeout expiry
 				.block(Duration.ofMinutes(10));
 		System.out.println(
-				expected_docs + " keys expected, " + actual_docs.size() + " keys present in collection " + collection);
+				expected_docs + " keys expected, " + actual_docs.size() + " keys present in collection");
 	}
 
 	public boolean isDone() {

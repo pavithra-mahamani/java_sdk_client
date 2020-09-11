@@ -63,6 +63,13 @@ public class DocOperations {
 		parser.addArgument("-ac", "--all_collections").type(Boolean.class).setDefault(Boolean.FALSE).help("True: if all collections are to be exercised");
 		parser.addArgument("-ln", "--language").type(String.class).setDefault("en").help("Locale for wiki datased");
 		parser.addArgument("-sd", "--shuffle_docs").type(Boolean.class).setDefault(Boolean.FALSE).help("if true, shuffle docs, else operate sequentially");
+		parser.addArgument("-es", "--elastic_sync").type(Boolean.class).setDefault(Boolean.FALSE).help("If true, then syncronize cb data with elastic bucket");
+
+
+		parser.addArgument("-es_host", "--elastic_host").type(String.class).setDefault("").help("Elastic instance IP");
+		parser.addArgument("-es_port", "--elastic_port").type(String.class).setDefault("").help("Elastic instance port");
+		parser.addArgument("-es_login", "--elastic_login").type(String.class).setDefault("").help("Elastic instance user login");
+		parser.addArgument("-es_password", "--elastic_password").type(String.class).setDefault("").help("Elastic instance password");
 
 		try {
 			Namespace ns = parser.parseArgs(args);
@@ -85,6 +92,7 @@ public class DocOperations {
 		String lang = ns.getString("language");
 		String docTemplate = ns.getString("template");
 		String preparedDataFile = FileUtils.getDataFilePrepared(docTemplate, lang);
+		boolean elasticSync = ns.getBoolean("elastic_sync");
 		List<String> fieldsToUpdate = Arrays.asList(fieldsToUpdateStr.split(","));
 
 		ConnectionFactory connection = new ConnectionFactory(clusterName, username, password, bucketName, scopeName,
@@ -97,7 +105,10 @@ public class DocOperations {
 				.loadPattern(ns.getString("load_pattern")).startSeqNum(ns.getInt("start_seq_num"))
 				.prefix(ns.getString("prefix")).suffix(ns.getString("suffix")).template(ns.getString("template"))
 				.expiry(ns.getInt("expiry")).size(ns.getInt("size")).start(ns.getInt("start")).end(ns.getInt("end"))
-				.dataFile(preparedDataFile).shuffleDocs(ns.getBoolean("shuffle_docs")).buildDocSpec();
+				.dataFile(preparedDataFile).shuffleDocs(ns.getBoolean("shuffle_docs")).setElasticSync(ns.getBoolean("elastic_sync"))
+				.setElasticIP(ns.getString("elastic_host")).setElasticPort(ns.getString("elastic_port"))
+				.setElasticLogin(ns.getString("elastic_login")).setElasticPassword(ns.getString("elastic_password"))
+				.buildDocSpec();
 
 
 		ForkJoinTask<String> create = null;

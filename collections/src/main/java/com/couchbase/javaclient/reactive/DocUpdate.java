@@ -2,17 +2,22 @@ package com.couchbase.javaclient.reactive;
 
 import static com.couchbase.client.java.kv.UpsertOptions.upsertOptions;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.ReactiveCollection;
+import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.manager.collection.CollectionSpec;
 import com.couchbase.client.java.manager.collection.ScopeSpec;
 import com.couchbase.javaclient.doc.DocSpec;
+import com.couchbase.javaclient.utils.FileUtils;
 
 import com.couchbase.javaclient.doc.DocTemplate;
 import com.couchbase.javaclient.doc.DocTemplateFactory;
@@ -26,6 +31,7 @@ public class DocUpdate implements Callable<String> {
 	private static int num_docs = 0;
 	private boolean done = false;
 	private List<String> fieldsToUpdate;
+	private Map<String, String> elasticMap = new HashMap<>();
 
 	public DocUpdate(DocSpec _ds, Bucket _bucket, List<String> fieldsToUpdate) {
 		ds = _ds;
@@ -45,6 +51,11 @@ public class DocUpdate implements Callable<String> {
 			updateCollection(ds, collection, fieldsToUpdate);
 		} else {
 			updateBucketCollections(ds, bucket, fieldsToUpdate);
+		}
+		// upsert to elastic
+		if (ds.isElasticSync() && !elasticMap.isEmpty()) {
+			final File elasticFile = FileUtils.writeForElastic(elasticMap, ds.get_template(), "update");
+			ElasticSync.sync(ds.getElasticIP(), ds.getElasticPort(), ds.getElasticLogin(), ds.getElasticPassword(), elasticFile, 5);
 		}
 		done = true;
 		return num_docs + " DOCS UPDATED!";
@@ -82,16 +93,24 @@ public class DocUpdate implements Callable<String> {
 		System.out.println("Started update..");
 		try {
 			docsToUpdate.publishOn(Schedulers.elastic())
-					.flatMap(key -> rcollection.upsert(key, docTemplate.updateJsonObject(collection.get(key).contentAsObject(), fieldsToUpdate),
+					.flatMap(key -> rcollection.upsert(key, getObject(key, docTemplate, elasticMap),
 							upsertOptions().expiry(Duration.ofSeconds(ds.get_expiry()))))
 					.log()
+					.buffer(1000)
 					// Num retries, first backoff, max backoff
 					.retryBackoff(10, Duration.ofMillis(1000), Duration.ofMillis(1000))
 					// Block until last value, complete or timeout expiry
 					.blockLast(Duration.ofMinutes(10));
+
 		} catch (Exception err) {
 			err.printStackTrace();
 		}
 		System.out.println("Completed update");
+	}
+
+	private JsonObject getObject(String key, DocTemplate docTemplate, Map<String, String> elasticMap) {
+		JsonObject obj = docTemplate.updateJsonObject(collection.get(key).contentAsObject(), fieldsToUpdate);
+		elasticMap.put(key, obj.toString());
+		return obj;
 	}
 }

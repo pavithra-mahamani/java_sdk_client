@@ -8,6 +8,6 @@ import com.github.javafaker.Faker;
 public interface DocTemplate {
 
 	JsonObject createJsonObject(Faker faker, int docsize, int id);
-	Object updateJsonObject(JsonObject obj, List<String> fieldsToUpdate);
+	JsonObject updateJsonObject(JsonObject obj, List<String> fieldsToUpdate);
 
 }

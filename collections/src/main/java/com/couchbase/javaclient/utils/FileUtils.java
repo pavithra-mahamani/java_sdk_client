@@ -1,16 +1,17 @@
 package com.couchbase.javaclient.utils;
 
 import com.couchbase.javaclient.DataTransformer;
+import com.couchbase.javaclient.reactive.ElasticSync;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
+
+import static com.couchbase.javaclient.reactive.ElasticSync.createElasticObject;
 
 public final class FileUtils {
 
@@ -97,6 +98,39 @@ public final class FileUtils {
         }
         return localFileName;
     }
+
+    public static File writeForElastic(Map<String, String> objects, String dataset, String operation) {
+        try {
+            final File elasticFile = getNewFile(ElasticSync.filePrefix, operation);
+            final FileWriter writer = new FileWriter(elasticFile);
+            for (String id: objects.keySet()) {
+                writer.write(createElasticObject(dataset, id, operation));
+                if ("update".equals(operation)){
+                    writer.write("{ \"doc\" : "+objects.get(id)+" }\n");
+                }
+                else if ("create".equals(operation)){
+                    writer.write(objects.get(id) + "\n");
+                }
+            }
+            writer.flush();
+            writer.close();
+            return elasticFile;
+        }catch(IOException ioe){
+            System.err.println("Cannot write data file for Elastic - " + ioe.getMessage());
+            ioe.printStackTrace();
+            System.exit(1);
+            return null;
+        }
+    }
+
+    public static File getNewFile(String filePrefix, String fileType) {
+        File f = new File(filePrefix + fileType + ".txt");
+        if (f.exists()) {
+            f.delete();
+        }
+        return f;
+    }
+
 
 
 }

@@ -16,13 +16,19 @@ public class DocSpecBuilder {
 	int _end;
 	String _dataFile;
 	boolean _shuffleDocs;
+	boolean isElasticSync;
+	String elasticIP;
+	String elasticPort;
+	String elasticLogin;
+	String elasticPassword;
 
 	public DocSpecBuilder() {
 	}
 
 	public DocSpec buildDocSpec() {
 		return new DocSpec(_num_ops, _percent_create, _percent_update, _percent_delete, _load_pattern, _startSeqNum,
-				_prefix, _suffix, _template, _expiry, _size, _start, _end, _dataFile, _shuffleDocs);
+				_prefix, _suffix, _template, _expiry, _size, _start, _end, _dataFile, _shuffleDocs, isElasticSync,
+				elasticIP, elasticPort, elasticLogin, elasticPassword);
 	}
 
 	public DocSpecBuilder loadPattern(String _load_pattern) {
@@ -97,6 +103,31 @@ public class DocSpecBuilder {
 	
 	public DocSpecBuilder shuffleDocs(boolean _shuffleDocs) {
 		this._shuffleDocs = _shuffleDocs;
+		return this;
+	}
+
+	public DocSpecBuilder setElasticSync(boolean needSync){
+		this.isElasticSync = needSync;
+		return this;
+	}
+
+	public DocSpecBuilder setElasticIP(String ip){
+		this.elasticIP = ip;
+		return this;
+	}
+
+	public DocSpecBuilder setElasticPort(String port){
+		this.elasticPort = port;
+		return this;
+	}
+
+	public DocSpecBuilder setElasticLogin(String login){
+		this.elasticLogin = login;
+		return this;
+	}
+
+	public DocSpecBuilder setElasticPassword(String password){
+		this.elasticPassword = password;
 		return this;
 	}
 }

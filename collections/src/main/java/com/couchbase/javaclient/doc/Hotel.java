@@ -84,7 +84,7 @@ public class Hotel implements DocTemplate {
 		return jsonObject;
 	}
 
-	public Object updateJsonObject(JsonObject obj, List<String> fieldsToUpdate) {
+	public JsonObject updateJsonObject(JsonObject obj, List<String> fieldsToUpdate) {
 		return obj;
 	}
 
